@@ -2,8 +2,6 @@ package com.mundoandroid.rickandmortyrecyclerview
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.Menu
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,15 +19,34 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: RickMortyAdapter
     private val rickMortyImages = mutableListOf<Result>()
-    val tag = "searchByName"
+    val tag = "getAllCharacters"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        binding.rvRickMorty
         binding.svRickMorty.setOnQueryTextListener(this)
+        getAllCharacters()
         initRecyclerView()
+    }
+
+    private fun getAllCharacters() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val callAll: Response<RickMortyResponse> = getRetrofit().create(ApiService::class.java).getCharacterByName("character")
+            val allCharacters: RickMortyResponse? = callAll.body()
+            runOnUiThread{
+                if(callAll.isSuccessful) {
+                    val images: List<Result> = allCharacters?.images ?: emptyList()
+                    rickMortyImages.clear()
+                    rickMortyImages.addAll(images)
+                    adapter.notifyDataSetChanged()
+                }else{
+                    showError()
+                }
+                hideKeyBoard()
+            }
+        }
     }
 
     private fun initRecyclerView() {
@@ -40,18 +57,17 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
     private fun getRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://rickandmortyapi.com/api/character/")
+            .baseUrl("https://rickandmortyapi.com/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
     private fun searchByName(query:String) {
         CoroutineScope(Dispatchers.IO).launch {
-            val call: Response<RickMortyResponse> = getRetrofit().create(ApiService::class.java).getCharacterByName("?name=$query")
+            val call: Response<RickMortyResponse> = getRetrofit().create(ApiService::class.java).getCharacterByName("character?name=$query")
             val characters: RickMortyResponse? = call.body()
             runOnUiThread{
                 if(call.isSuccessful) {
-                    Log.d(tag, "Esta es la respuesta ${characters}")
                     val images: List<Result> = characters?.images ?: emptyList()
                     rickMortyImages.clear()
                     rickMortyImages.addAll(images)
@@ -76,6 +92,8 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
     override fun onQueryTextSubmit(query: String?): Boolean {
         if(!query.isNullOrEmpty()){
             searchByName(query.toLowerCase())
+        }else{
+            getAllCharacters()
         }
         return true
     }
