@@ -3,7 +3,9 @@ package com.mundoandroid.rickandmortyrecyclerview
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mundoandroid.rickandmortyrecyclerview.databinding.ActivityMainBinding
 import com.mundoandroid.rickandmortyrecyclerview.model.Result
@@ -19,19 +21,27 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: RickMortyAdapter
     private val rickMortyImages = mutableListOf<Result>()
-    val tag = "getAllCharacters"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.rvRickMorty
-        binding.svRickMorty.setOnQueryTextListener(this)
-        getAllCharacters()
         initRecyclerView()
+        binding.svRickMorty.setOnQueryTextListener(this)
+
     }
 
-    private fun getAllCharacters() {
+    private fun navigateTo(character: Result){
+        toast(character.name)
+    }
+
+    private fun initRecyclerView() {
+        adapter = RickMortyAdapter(rickMortyImages){ navigateTo(it) }
+        binding.rvRickMorty.layoutManager = LinearLayoutManager(this)
+        binding.rvRickMorty.adapter = adapter
+
+
         CoroutineScope(Dispatchers.IO).launch {
             val callAll: Response<RickMortyResponse> = getRetrofit().create(ApiService::class.java).getCharacterByName("character")
             val allCharacters: RickMortyResponse? = callAll.body()
@@ -47,12 +57,10 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
                 hideKeyBoard()
             }
         }
-    }
 
-    private fun initRecyclerView() {
-        adapter = RickMortyAdapter(rickMortyImages)
-        binding.rvRickMorty.layoutManager = LinearLayoutManager(this)
-        binding.rvRickMorty.adapter = adapter
+
+
+
     }
 
     private fun getRetrofit(): Retrofit {
@@ -92,8 +100,6 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
     override fun onQueryTextSubmit(query: String?): Boolean {
         if(!query.isNullOrEmpty()){
             searchByName(query.toLowerCase())
-        }else{
-            getAllCharacters()
         }
         return true
     }

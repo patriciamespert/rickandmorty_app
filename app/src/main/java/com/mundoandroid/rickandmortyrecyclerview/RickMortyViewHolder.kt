@@ -13,6 +13,6 @@ class RickMortyViewHolder(view: View):RecyclerView.ViewHolder(view) {
             .with(binding.root.context)
             .load(result.image)
             .into(binding.ivRickMorty)
-
+        binding.tvRickMorty.text = result.name
     }
 }
