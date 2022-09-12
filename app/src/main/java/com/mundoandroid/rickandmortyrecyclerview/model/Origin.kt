@@ -1,6 +1,6 @@
 package com.mundoandroid.rickandmortyrecyclerview.model
 
-data class Origin (
+data class Origin @JvmOverloads constructor (
     val url: String,
     val name: String
 )

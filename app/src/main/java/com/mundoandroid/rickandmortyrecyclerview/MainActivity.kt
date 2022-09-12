@@ -1,5 +1,6 @@
 package com.mundoandroid.rickandmortyrecyclerview
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
@@ -28,20 +29,20 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initRecyclerView()
+        getAllCharacters()
         binding.svRickMorty.setOnQueryTextListener(this)
 
     }
 
     private fun navigateTo(character: Result){
-        toast(character.name)
+        val intent = Intent(this, DetailActivity::class.java)
+        intent.putExtra(DetailActivity.CHARACTER_NAME, character.name)
+        intent.putExtra(DetailActivity.CHARACTER_IMAGE, character.image)
+        intent.putExtra(DetailActivity.CHARACTER_STATUS, character.status)
+        startActivity(intent)
     }
 
-    private fun initRecyclerView() {
-        adapter = RickMortyAdapter(rickMortyImages){ navigateTo(it) }
-        binding.rvRickMorty.layoutManager = LinearLayoutManager(this)
-        binding.rvRickMorty.adapter = adapter
-
-
+    private fun getAllCharacters(){
         CoroutineScope(Dispatchers.IO).launch {
             val callAll: Response<RickMortyResponse> = getRetrofit().create(ApiService::class.java).getCharacterByName("character")
             val allCharacters: RickMortyResponse? = callAll.body()
@@ -57,10 +58,12 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
                 hideKeyBoard()
             }
         }
+    }
 
-
-
-
+    private fun initRecyclerView() {
+        adapter = RickMortyAdapter(rickMortyImages){ navigateTo(it) }
+        binding.rvRickMorty.layoutManager = LinearLayoutManager(this)
+        binding.rvRickMorty.adapter = adapter
     }
 
     private fun getRetrofit(): Retrofit {
