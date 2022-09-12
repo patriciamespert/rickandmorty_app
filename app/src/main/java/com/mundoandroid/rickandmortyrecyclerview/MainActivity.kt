@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         intent.putExtra(DetailActivity.CHARACTER_NAME, character.name)
         intent.putExtra(DetailActivity.CHARACTER_IMAGE, character.image)
         intent.putExtra(DetailActivity.CHARACTER_STATUS, character.status)
+        intent.putExtra(DetailActivity.CHARACTER_GENDER, character.gender)
         startActivity(intent)
     }
 

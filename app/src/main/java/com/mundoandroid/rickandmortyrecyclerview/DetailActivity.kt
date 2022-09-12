@@ -12,6 +12,7 @@ class DetailActivity : AppCompatActivity() {
         const val CHARACTER_NAME = "DetailActivity:name"
         const val CHARACTER_IMAGE = "DetailActivity:image"
         const val CHARACTER_STATUS = "DetailActivity:status"
+        const val CHARACTER_GENDER = "DetailActivity:gender"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,9 +22,10 @@ class DetailActivity : AppCompatActivity() {
         Glide
             .with(binding.root.context)
             .load(intent.getStringExtra(CHARACTER_IMAGE))
-            .into(binding.ivLinear)
+            .into(binding.image)
 
-        binding.tvLinear.text = intent.getStringExtra(CHARACTER_NAME)
+        binding.name.text = intent.getStringExtra(CHARACTER_NAME)
         binding.status.text = intent.getStringExtra(CHARACTER_STATUS)
+        binding.gender.text = intent.getStringExtra(CHARACTER_GENDER)
     }
 }
